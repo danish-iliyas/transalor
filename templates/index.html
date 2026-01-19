@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ampyr Document Translator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Ampyr Brand Colors */
+            --primary: #1A988B;
+            --primary-dark: #147A70;
+            --primary-light: #2BB3A4;
+            --secondary: #0f172a;
+            --success: #1A988B;
+            --error: #ef4444;
+            --bg-dark: #0a0f1a;
+            --bg-card: #111827;
+            --bg-input: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --gradient-1: linear-gradient(135deg, #1A988B 0%, #2BB3A4 100%);
+            --gradient-2: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --accent: #1A988B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--gradient-2);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(26, 152, 139, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(26, 152, 139, 0.1) 0%, transparent 50%);
+        }
+
+        .header-logo {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .header-logo svg {
+            height: 48px;
+            width: auto;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            position: relative;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            position: relative;
+        }
+
+        .azure-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(26, 152, 139, 0.2);
+            border: 1px solid var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            position: relative;
+            color: var(--primary-light);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--bg-card);
+            padding: 0.5rem;
+            border-radius: 1rem;
+            width: fit-content;
+            border: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-input);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-title .icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 1rem;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            background: var(--bg-input);
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(26, 152, 139, 0.1);
+        }
+
+        .upload-zone input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .upload-text span {
+            color: var(--primary-light);
+            font-weight: 500;
+        }
+
+        .file-types {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .selected-file {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(26, 152, 139, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .selected-file .file-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .selected-file .file-info {
+            flex: 1;
+        }
+
+        .selected-file .file-name {
+            font-weight: 500;
+        }
+
+        .selected-file .file-size {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Form Elements */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        select,
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        select:focus,
+        textarea:focus,
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 152, 139, 0.2);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-input);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .checkbox-group input {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(26, 152, 139, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+        }
+
+        /* Results */
+        .result-card {
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .result-section h4 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .result-content {
+            background: var(--bg-input);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--bg-input);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Error */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-badge.success {
+            background: rgba(26, 152, 139, 0.1);
+            color: var(--primary-light);
+        }
+
+        .status-badge.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-logo svg {
+                height: 36px;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .upload-zone {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 128 32">
+                <g clip-path="url(#ampyr-logo)">
+                    <path fill="#1A988B"
+                        d="M28.425 19.71.64 31.414a.46.46 0 0 1-.602-.605l3.733-8.764a.47.47 0 0 1 .386-.279z"></path>
+                    <path fill="#fff"
+                        d="M28.924 18.19 13.918.79a.46.46 0 0 1 .345-.761C16.116.02 19.996.003 21.108 0c.187 0 .352.11.424.282l7.395 17.907zM28.168 18.697 7.82 13.956a.46.46 0 0 1-.316-.631l2.183-5.151a.46.46 0 0 1 .66-.213l17.818 10.733M34.264 30.783 29.686 19.97l-.144.127-5.764 5.845a.46.46 0 0 0 .127.737c2.385 1.144 7.487 3.61 9.734 4.699a.46.46 0 0 0 .625-.594M51.326 12.915h-7.484a.24.24 0 0 0-.222.15l-1.432 3.5a.24.24 0 0 1-.222.15h-2.322a.24.24 0 0 1-.219-.332L46.29.147A.24.24 0 0 1 46.51 0h2.143c.095 0 .181.058.218.147l6.865 16.233a.238.238 0 0 1-.219.332h-2.322a.24.24 0 0 1-.221-.15l-1.432-3.5a.24.24 0 0 0-.222-.15zm-1.15-2.316a.24.24 0 0 0 .222-.329l-2.013-4.897c-.358-.908-.764-2.172-.79-2.172h-.023c-.023 0-.43 1.264-.79 2.172L44.77 10.27a.24.24 0 0 0 .222.329zM75.726.24v16.232c0 .133-.107.24-.24.24h-2.125a.24.24 0 0 1-.24-.24v-6.136c0-3.03.145-5.897.119-5.897h-.023c-.023 0-1.052 1.766-1.48 2.53l-3.178 5.49a.24.24 0 0 1-.208.119h-1.109a.24.24 0 0 1-.207-.118l-3.178-5.491c-.43-.764-1.432-2.53-1.458-2.53h-.023c-.023 0 .095 2.864.095 5.897v6.137c0 .132-.106.239-.239.239h-2.126a.24.24 0 0 1-.239-.24V.24c0-.132.107-.239.24-.239h2.108c.084 0 .161.043.205.118l3.727 6.28c1.386 2.293 1.625 2.867 1.648 2.867h.023c.023 0 .262-.574 1.622-2.867l3.734-6.28A.24.24 0 0 1 73.378 0h2.109c.132 0 .239.107.239.24M87.634 0c3.963 0 6.349 2.054 6.349 5.468s-2.388 5.467-6.35 5.467h-2.65a.24.24 0 0 0-.239.24v5.3c0 .133-.106.240-.239.240h-2.172a.24.24 0 0 1-.24-.24V.24c0-.132.107-.239.24-.239zm-.05 8.452c2.34 0 3.653-1.123 3.653-2.984s-1.385-2.985-3.652-2.985h-2.602a.24.24 0 0 0-.239.24v5.49c0 .133.107.24.24.24zM111.029.38l-6.122 8.343a.24.24 0 0 0-.046.141v7.608c0 .133-.107.24-.239.24h-2.149a.24.24 0 0 1-.239-.240V8.865c0-.052-.018-.1-.046-.14L96.066.38a.24.24 0 0 1 .193-.38h2.391c.075 0 .147.035.193.098l3.725 5.036c.452.596.953 1.29.979 1.29h.023c.024 0 .525-.691.954-1.29l3.728-5.036a.24.24 0 0 1 .193-.098h2.394a.24.24 0 0 1 .193.38zM123.866 16.712a.24.24 0 0 1-.204-.119l-3.463-5.873c-.167.022-.334.022-.524.022h-2.579a.24.24 0 0 0-.239.24v5.49c0 .133-.106.24-.239.240h-2.172a.24.24 0 0 1-.239-.24V.24c0-.132.107-.239.239-.239h5.229c4.01 0 6.421 2.126 6.421 5.419 0 2.241-1.118 3.892-3.079 4.719a.238.238 0 0 0-.116.342l3.593 5.866a.239.239 0 0 1-.205.363h-2.423zm-3.883-8.309c2.267 0 3.368-1.336 3.368-2.984s-1.193-2.936-3.368-2.936h-2.889a.24.24 0 0 0-.24.24v5.441c0 .133.107.24.24.24z">
+                    </path>
+                    <path fill="#1A988B"
+                        d="M45.05 24.89a.5.5 0 0 1-.12.146.27.27 0 0 1-.164.046.43.43 0 0 1-.24-.095 6 6 0 0 0-.334-.216 2.5 2.5 0 0 0-.48-.216 2.1 2.1 0 0 0-.672-.095q-.367 0-.645.095-.278.097-.464.262-.187.166-.282.392-.096.224-.096.487a.88.88 0 0 0 .173.559q.172.22.453.38.279.159.636.274.356.116.73.242.372.124.728.288.355.163.637.412.28.248.452.608.173.36.173.878 0 .554-.19 1.038a2.5 2.5 0 0 1-.55.846c-.24.242-.54.433-.89.568a3.3 3.3 0 0 1-1.2.207 3.9 3.9 0 0 1-1.497-.3 4 4 0 0 1-.634-.342 3 3 0 0 1-.527-.452l.354-.597a.4.4 0 0 1 .127-.115.3.3 0 0 1 .167-.046q.121 0 .282.13.16.127.398.282.237.157.565.282c.218.084.486.13.8.13q.386-.001.689-.1.303-.103.51-.292.208-.19.317-.458.111-.267.11-.596-.001-.367-.17-.6a1.4 1.4 0 0 0-.45-.391 3.4 3.4 0 0 0-.637-.268q-.355-.111-.729-.23a8 8 0 0 1-.729-.277 2.4 2.4 0 0 1-.636-.412 1.85 1.85 0 0 1-.45-.637q-.169-.38-.17-.942a2.23 2.23 0 0 1 .686-1.613q.333-.324.827-.519.491-.195 1.12-.195.705 0 1.297.224.591.226 1.028.646l-.302.587zM55.058 27.71q0 .94-.3 1.723a4 4 0 0 1-.85 1.354q-.548.57-1.313.885t-1.697.314a4.4 4.4 0 0 1-1.694-.314 3.8 3.8 0 0 1-1.313-.885 4.1 4.1 0 0 1-.85-1.354 4.8 4.8 0 0 1-.303-1.722c0-.626.101-1.196.303-1.72a4 4 0 0 1 .85-1.357q.544-.569 1.313-.887a4.4 4.4 0 0 1 1.694-.317c.617 0 1.187.106 1.697.317q.765.318 1.314.887.548.568.85 1.357c.201.527.299 1.097.299 1.72m-1.27 0q-.001-.746-.205-1.342a2.8 2.8 0 0 0-.579-1.008 2.5 2.5 0 0 0-.91-.637 3.1 3.1 0 0 0-1.193-.222q-.659 0-1.193.222-.535.221-.913.637a2.8 2.8 0 0 0-.582 1.008 4.1 4.1 0 0 0-.204 1.343c0 .498.069.95.204 1.345q.205.592.582 1.005.38.414.913.634.532.22 1.193.219.66 0 1.193-.219.535-.22.91-.634.376-.413.58-1.005.202-.593.204-1.345M61.583 30.855v1.043h-4.794v-8.375h1.242v7.332zM70.334 31.898h-.956a.42.42 0 0 1-.42-.291l-.741-1.942h-3.693l-.74 1.942a.455.455 0 0 1-.421.29h-.957l3.336-8.374h1.253l3.336 8.375zm-2.454-3.12-1.242-3.25a7 7 0 0 1-.268-.84 9 9 0 0 1-.265.852l-1.236 3.238zM77.897 31.899h-1.109q-.333 0-.484-.262l-2.071-2.904a.6.6 0 0 0-.216-.207.8.8 0 0 0-.349-.061h-.81v3.437h-1.24v-8.375h2.413q.812 0 1.397.167.588.165.968.473.382.306.565.737.183.432.184.968 0 .436-.135.824a2.1 2.1 0 0 1-.395.692q-.258.306-.633.527a3.1 3.1 0 0 1-.847.337q.233.14.403.392l2.356 3.26zm-3.909-4.338q.479.001.844-.119.364-.116.61-.328t.37-.507a1.7 1.7 0 0 0 .124-.651q0-.723-.476-1.092-.475-.368-1.426-.369h-1.172v3.063h1.132zM87.814 30.89l-.006 1.008h-5.19v-8.375h5.19v1.009h-3.943v2.653h3.171v.974h-3.171v2.73zM92.652 30.901q.501 0 .899-.17.396-.168.67-.475a2.1 2.1 0 0 0 .421-.729q.147-.422.147-.936v-5.068h1.236v5.068q0 .734-.233 1.36c-.156.417-.38.774-.671 1.08q-.437.455-1.063.711T92.652 32q-.783-.001-1.406-.257-.624-.257-1.06-.711a3.1 3.1 0 0 1-.671-1.08 3.9 3.9 0 0 1-.234-1.36v-5.068h1.242v5.062q0 .513.144.94.142.425.418.73.273.308.67.476.399.17.9.17zM104.479 31.899h-1.109q-.333 0-.484-.262l-2.071-2.904a.6.6 0 0 0-.216-.207.8.8 0 0 0-.349-.061h-.81v3.437H98.2v-8.375h2.413q.811 0 1.398.167.587.165.967.473.382.306.565.737.183.432.184.968 0 .436-.135.824a2.1 2.1 0 0 1-.395.692q-.258.306-.633.527-.372.221-.847.337.234.14.403.392l2.356 3.26zm-3.909-4.338q.478.001.844-.119.364-.116.611-.328a1.4 1.4 0 0 0 .369-.507q.122-.293.124-.651 0-.723-.476-1.092-.475-.368-1.426-.369h-1.172v3.063h1.132zM113.453 27.71q0 .94-.3 1.723a4 4 0 0 1-.85 1.354q-.549.57-1.314.885a4.4 4.4 0 0 1-1.696.314 4.4 4.4 0 0 1-1.694-.314 3.8 3.8 0 0 1-1.314-.885 4.1 4.1 0 0 1-.85-1.354 4.8 4.8 0 0 1-.302-1.722c0-.626.101-1.196.302-1.72q.302-.787.85-1.357.544-.569 1.314-.887a4.4 4.4 0 0 1 1.694-.317c.616 0 1.187.106 1.696.317q.765.318 1.314.887.548.568.85 1.357c.202.527.3 1.097.3 1.72m-1.271 0q0-.746-.204-1.342a2.9 2.9 0 0 0-.579-1.008 2.5 2.5 0 0 0-.911-.637 3.1 3.1 0 0 0-1.192-.222c-.438 0-.839.075-1.193.222q-.534.221-.913.637a2.8 2.8 0 0 0-.582 1.008 4.1 4.1 0 0 0-.205 1.343c0 .498.069.95.205 1.345q.204.592.582 1.005.379.414.913.634.531.22 1.193.219.66 0 1.192-.219a2.5 2.5 0 0 0 .911-.634q.375-.413.579-1.005.203-.593.204-1.345M117.781 23.523q.804.001 1.4.188.597.186.986.527c.259.227.455.501.579.824q.19.483.19 1.074t-.205 1.084a2.35 2.35 0 0 1-.599.85 2.8 2.8 0 0 1-.988.55q-.593.195-1.363.195h-1.293v3.086h-1.242v-8.375h2.538zm0 4.31q.473 0 .833-.12.36-.122.599-.35a1.5 1.5 0 0 0 .366-.535q.12-.311.121-.692 0-.765-.476-1.201-.474-.436-1.443-.438h-1.293v3.336zM127.572 30.89l-.006 1.008h-5.191v-8.375h5.191v1.009h-3.944v2.653h3.172v.974h-3.172v2.73z">
+                    </path>
+                </g>
+                <defs>
+                    <clipPath id="ampyr-logo">
+                        <path fill="#fff" d="M0 0h127.574v32H0z"></path>
+                    </clipPath>
+                </defs>
+            </svg>
+        </div>
+        <h1>Document Translator</h1>
+        <p>Upload documents and translate them to any language using AI</p>
+        <div class="azure-badge">
+            ⚡ Powered by Azure AI Services
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="document">📄 Document Upload</button>
+            <button class="tab" data-tab="text">✍️ Text Translation</button>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Document Upload Tab -->
+        <div id="documentTab" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon">📁</div>
+                    Upload Document
+                </div>
+
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="fileInput" accept=".pdf,.docx,.txt">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">
+                        Drag & drop your document here or <span>browse</span>
+                    </div>
+                    <div class="file-types">Supports: PDF, DOCX, TXT (Max 16MB)</div>
+                </div>
+
+                <div class="selected-file hidden" id="selectedFile">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                        <div class="file-name" id="fileName"></div>
+                        <div class="file-size" id="fileSize"></div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="clearFile()">✕</button>
+                </div>
+
+                <div class="form-row" style="margin-top: 1.5rem;">
+                    <div class="form-group">
+                        <label for="sourceLang">Source Language</label>
+                        <select id="sourceLang">
+                            <option value="en">English</option>
+                            <option value="hi">Hindi</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                            <option value="zh">Chinese</option>
+                            <option value="ar">Arabic</option>
+                            <option value="ja">Japanese</option>
+                            <option value="ko">Korean</option>
+                            <option value="pt">Portuguese</option>
+                            <option value="ru">Russian</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="targetLang">Target Language</label>
+                        <select id="targetLang">
+                            <option value="hi">Hindi</option>
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                            <option value="zh">Chinese</option>
+                            <option value="ar">Arabic</option>
+                            <option value="ja">Japanese</option>
+                            <option value="ko">Korean</option>
+                            <option value="pt">Portuguese</option>
+                            <option value="ru">Russian</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label class="checkbox-group">
+                    <input type="checkbox" id="summarizeCheck">
+                    <div>
+                        <strong>Summarize before translating</strong>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            Use Azure OpenAI to create a concise summary first
+                        </div>
+                    </div>
+                </label>
+
+                <button class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;" onclick="uploadDocument()"
+                    id="uploadBtn">
+                    🚀 Translate Document
+                </button>
+            </div>
+        </div>
+
+        <!-- Text Translation Tab -->
+        <div id="textTab" class="tab-content hidden">
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon">✍️</div>
+                    Translate Text
+                </div>
+
+                <div class="form-group">
+                    <label for="inputText">Enter text to translate</label>
+                    <textarea id="inputText" placeholder="Type or paste your text here..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="textSourceLang">Source Language</label>
+                        <select id="textSourceLang">
+                            <option value="en">English</option>
+                            <option value="hi">Hindi</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="textTargetLang">Target Language</label>
+                        <select id="textTargetLang">
+                            <option value="hi">Hindi</option>
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label class="checkbox-group">
+                    <input type="checkbox" id="textSummarizeCheck">
+                    <div>
+                        <strong>Summarize before translating</strong>
+                    </div>
+                </label>
+
+                <button class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;" onclick="translateText()"
+                    id="translateBtn">
+                    🌐 Translate Text
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loadingText">Processing your document...</div>
+        </div>
+
+        <!-- Results -->
+        <div class="card result-card" id="resultCard">
+            <div class="card-title">
+                <div class="icon">✅</div>
+                Translation Result
+                <span class="status-badge success" style="margin-left: auto;">Success</span>
+            </div>
+
+            <div class="result-section" id="summarySection" class="hidden">
+                <h4>📝 AI Summary (English)</h4>
+                <div class="result-content" id="summaryResult"></div>
+            </div>
+
+            <div class="result-section">
+                <h4 id="translatedLabel">🌐 Translated Text</h4>
+                <div class="result-content" id="translatedResult"></div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button class="btn btn-secondary" onclick="copyResult()">📋 Copy</button>
+                <button class="btn btn-secondary" onclick="clearResult()">🔄 New Translation</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© Ampyr Solar Europe | Powered by Azure AI Translator & Azure OpenAI</p>
+    </footer>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000';
+        let selectedFile = null;
+
+        // Tab Switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const tabName = tab.dataset.tab;
+                document.getElementById('documentTab').classList.toggle('hidden', tabName !== 'document');
+                document.getElementById('textTab').classList.toggle('hidden', tabName !== 'text');
+                clearResult();
+            });
+        });
+
+        // Drag and Drop
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+            const validExts = ['.pdf', '.docx', '.txt'];
+
+            const ext = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+
+            if (!validExts.includes(ext)) {
+                showError('Please upload a PDF, DOCX, or TXT file.');
+                return;
+            }
+
+            if (file.size > 16 * 1024 * 1024) {
+                showError('File size must be less than 16MB.');
+                return;
+            }
+
+            selectedFile = file;
+            document.getElementById('selectedFile').classList.remove('hidden');
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            uploadZone.classList.add('hidden');
+            hideError();
+        }
+
+        function clearFile() {
+            selectedFile = null;
+            fileInput.value = '';
+            document.getElementById('selectedFile').classList.add('hidden');
+            uploadZone.classList.remove('hidden');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // Upload Document
+        async function uploadDocument() {
+            if (!selectedFile) {
+                showError('Please select a file first.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('source_lang', document.getElementById('sourceLang').value);
+            formData.append('target_lang', document.getElementById('targetLang').value);
+            formData.append('summarize', document.getElementById('summarizeCheck').checked ? 'true' : 'false');
+
+            showLoading('Extracting text and translating...');
+
+            try {
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                hideLoading();
+
+                if (data.success) {
+                    showResult(data);
+                } else {
+                    showError(data.error || 'Translation failed.');
+                }
+            } catch (error) {
+                hideLoading();
+                showError('Connection failed. Make sure the API server is running.');
+            }
+        }
+
+        // Translate Text
+        async function translateText() {
+            const text = document.getElementById('inputText').value.trim();
+
+            if (!text) {
+                showError('Please enter some text to translate.');
+                return;
+            }
+
+            const payload = {
+                text: text,
+                source_lang: document.getElementById('textSourceLang').value,
+                target_lang: document.getElementById('textTargetLang').value,
+                summarize: document.getElementById('textSummarizeCheck').checked
+            };
+
+            showLoading('Translating your text...');
+
+            try {
+                const response = await fetch(`${API_BASE}/translate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                hideLoading();
+
+                if (data.success) {
+                    showResult(data);
+                } else {
+                    showError(data.error || 'Translation failed.');
+                }
+            } catch (error) {
+                hideLoading();
+                showError('Connection failed. Make sure the API server is running.');
+            }
+        }
+
+        // UI Helpers
+        function showLoading(text) {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('resultCard').classList.remove('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+
+        function showResult(data) {
+            const resultCard = document.getElementById('resultCard');
+            const summarySection = document.getElementById('summarySection');
+
+            if (data.summary) {
+                summarySection.classList.remove('hidden');
+                document.getElementById('summaryResult').textContent = data.summary;
+            } else {
+                summarySection.classList.add('hidden');
+            }
+
+            const langName = document.getElementById('targetLang')?.options[document.getElementById('targetLang')?.selectedIndex]?.text ||
+                document.getElementById('textTargetLang')?.options[document.getElementById('textTargetLang')?.selectedIndex]?.text ||
+                data.target_lang;
+
+            document.getElementById('translatedLabel').textContent = `🌐 Translated Text (${langName})`;
+            document.getElementById('translatedResult').textContent = data.translated_text;
+
+            resultCard.classList.add('show');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.add('show');
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+
+        function clearResult() {
+            document.getElementById('resultCard').classList.remove('show');
+            hideError();
+        }
+
+        function copyResult() {
+            const text = document.getElementById('translatedResult').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+
+</html>
